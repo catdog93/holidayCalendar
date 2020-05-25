@@ -1,11 +1,23 @@
 package main
 
 import (
-	"github.com/catdog93/test-task/holidaysService"
+	hol "github.com/catdog93/test-task/holidaysService"
+	"log"
 )
 
 func main() {
 	// input
-	calendar := holidaysService.HolidaysCalendar{}
-	calendar.GetHolidaysForThisYear(2019, "UA")
+	calendar := &hol.HolidaysCalendar{}
+	//calendar.GetHolidaysForThisYear(2019, "UA")*/
+	if PublicHolidaysResponse, err := calendar.GetPublicHolidays(hol.PublicHolidaysURL); err != nil {
+		log.Fatal(err)
+	} else {
+		calendar.PublicHolidaysResponse = PublicHolidaysResponse
+
+		if _, err := calendar.GetNearHolidaysInfo(); err != nil {
+			log.Fatal(err)
+		}
+
+		//fmt.Println(calendar.PublicHolidaysResponse)
+	}
 }
