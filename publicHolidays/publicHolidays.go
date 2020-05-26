@@ -6,7 +6,10 @@ import (
 	"time"
 )
 
-const longWeekendsString = ", and the weekend will last 3 days: "
+const (
+	nextHolidayString  = "The next holiday is %s, %v %v"
+	longWeekendsString = ", and the weekend will last 3 days: "
+)
 
 const DateFormat = "2006-01-02"
 
@@ -54,25 +57,27 @@ func (calendar *Calendar) IsHolidayToday() (*Holiday, error) {
 	return nil, nil
 }
 
-// Method returns info about the next closest holiday. Detect long weekends, if holiday is adjacent to it.
+// Method returns info about the next closest holiday. Detects long weekends, if holiday is adjacent to it.
 func (calendar *Calendar) GetNearHolidaysInfo() (nearHolidaysInfo string, error error) {
 	holiday := calendar.Holidays[0] // the nearest holiday since today
-	nearHolidaysInfo = fmt.Sprintf("The next holiday is %s, %v %v", holiday.Name, holiday.Date.Month(), holiday.Date.Day())
+	nearHolidaysInfo = fmt.Sprintf(nextHolidayString, holiday.Name, holiday.Date.Month(), holiday.Date.Day())
 	weekday := holiday.Date.Weekday()
+	weekendsRangeInfo := ""
 	switch weekday {
 	case time.Friday, time.Saturday:
-		lastWeekend := holiday.Date.Add(24 * 2 * time.Hour)
-		weekendsRange := fmt.Sprintf("%v %v - %v %v.\n", holiday.Date.Month(), holiday.Date.Day(), lastWeekend.Month(), lastWeekend.Day())
-		nearHolidaysInfo += longWeekendsString + weekendsRange
+		weekendsRangeInfo += getWeekendsRangeInfo(holiday.Date)
 	case time.Sunday:
-		firstWeekend := holiday.Date.Add(-24 * time.Hour)
-		lastWeekend := holiday.Date.Add(24 * time.Hour)
-		weekendsRange := fmt.Sprintf("%v %v - %v %v.\n", firstWeekend.Month(), firstWeekend.Day(), lastWeekend.Month(), lastWeekend.Day())
-		nearHolidaysInfo += longWeekendsString + weekendsRange
+		weekendsRangeInfo += getWeekendsRangeInfo(holiday.Date.Add(-24 * time.Hour))
 	case time.Monday:
-		firstWeekend := holiday.Date.Add(-24 * 2 * time.Hour)
-		weekendsRange := fmt.Sprintf("%v %v - %v %v.\n", firstWeekend.Month(), firstWeekend.Day(), holiday.Date.Month(), holiday.Date.Day())
-		nearHolidaysInfo += longWeekendsString + weekendsRange
+		weekendsRangeInfo += getWeekendsRangeInfo(holiday.Date.Add(-24 * 2 * time.Hour))
 	}
+	nearHolidaysInfo += weekendsRangeInfo
 	return nearHolidaysInfo, nil
+}
+
+// Function calculates range of long weekends, when holiday is adjacent to it.
+func getWeekendsRangeInfo(firstWeekend time.Time) string {
+	lastWeekend := firstWeekend.Add(24 * 2 * time.Hour)
+	weekendsRange := fmt.Sprintf("%v %v - %v %v.\n", firstWeekend.Month(), firstWeekend.Day(), lastWeekend.Month(), lastWeekend.Day())
+	return longWeekendsString + weekendsRange
 }
