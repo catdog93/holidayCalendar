@@ -1,0 +1,27 @@
+# Find all current managers of each department and display his/her title, first name, last name, current salary.
+select t.title, e.first_name, e.last_name, s.salary
+from dept_manager dm
+         join employees e on dm.emp_no = e.emp_no
+         join titles t on t.emp_no = e.emp_no
+         join salaries s on e.emp_no = s.emp_no
+where CURRENT_DATE() < dm.to_date # CURRENT_DATE() < to_date
+  and CURRENT_DATE() < t.to_date
+  and CURRENT_DATE() < s.to_date;
+
+# Find all employees_insert (department, title, first name, last name, hire date, how many years they have been working) to congratulate them on their hire anniversary this month.
+select t.title,
+       e.first_name,
+       e.last_name,
+       e.hire_date,
+       (DATEDIFF(CURRENT_DATE(), e.hire_date) / 365) as years_of_working
+from employees e
+         join dept_emp de on de.emp_no = e.emp_no
+         join titles t on t.emp_no = e.emp_no;
+
+# Find all departments_insert, their current employee count, their current sum salary.
+select d.dept_no, d.dept_name, count(de.dept_no), sum(s.salary)
+from dept_emp de
+         join departments d on de.dept_no = d.dept_no
+         join salaries s on de.emp_no = s.emp_no
+where CURRENT_DATE() < s.to_date
+group by d.dept_no;
