@@ -20,8 +20,8 @@ P.S.​ A candidate is expected to calculate long weekends manually, without usi
 Test task 2 (MySQL)
 
 Download and install the Employee sample database
-(​ https://dev.mysql.com/doc/employee/en/employees-installation.html​ ).
-Structure: ​ https://dev.mysql.com/doc/employee/en/sakila-st ructure.html​ .
+(​https://dev.mysql.com/doc/employee/en/employees-installation.html​).
+Structure: ​https://dev.mysql.com/doc/employee/en/sakila-structure.html​ .
 
 Create queries:
 1) Find all current managers of each department and display his/her title, first name, last
