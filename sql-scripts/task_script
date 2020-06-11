@@ -18,7 +18,7 @@ from employees e
          join dept_emp de on de.emp_no = e.emp_no
          join titles t on t.emp_no = e.emp_no;
 
-# Find all departments_insert, their current employee count, their current sum salary.
+# Find all departments, their current employee count, their current sum salary.
 select d.dept_no, d.dept_name, count(de.dept_no), sum(s.salary)
 from dept_emp de
          join departments d on de.dept_no = d.dept_no
