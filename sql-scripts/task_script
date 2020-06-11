@@ -19,9 +19,9 @@ from employees e
          join titles t on t.emp_no = e.emp_no;
 
 # Find all departments, their current employee count, their current sum salary.
-select d.dept_no, d.dept_name, count(de.dept_no), sum(s.salary)
+select d.dept_name, count(de.dept_no), sum(s.salary)
 from dept_emp de
          join departments d on de.dept_no = d.dept_no
          join salaries s on de.emp_no = s.emp_no
 where CURRENT_DATE() < s.to_date
-group by d.dept_no;
+group by d.dept_name;
