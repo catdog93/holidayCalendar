@@ -24,41 +24,72 @@ type Holiday struct {
 
 // This method inits instance of Holiday. Holiday store "sorted slices" of upcoming holidays since now
 func (calendar *Calendar) InitHolidaysCalendar() error {
-	today := time.Now()
+	now := time.Now()
+	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+
 	publicHolidaysResponse, err := hol.GetPublicHolidays(today.Year())
 	if err != nil {
 		return err
 	}
+
 	holidays := make([]Holiday, 0, cap(publicHolidaysResponse))
+
 	// Holiday'll store only upcoming holidays since now
-	for _, value := range publicHolidaysResponse {
-		holidayDate, err := time.Parse(DateFormat, value.Date)
+	for _, holiday := range publicHolidaysResponse {
+
+		holidayDate, err := time.Parse(DateFormat, holiday.Date)
 		if err != nil {
 			return err
 		}
+
 		timeDifference := holidayDate.Sub(today).Hours()
+
 		if timeDifference >= 0 {
-			holidays = append(holidays, Holiday{Name: value.Name, Date: holidayDate})
+			holidays = append(holidays, Holiday{Name: holiday.Name, Date: holidayDate})
 		}
 	}
 	calendar.Holidays = holidays
 	return nil
 }
 
-// Simple method, gives info whether is holiday today
-func (calendar *Calendar) IsHolidayToday() (*Holiday, error) {
-	today := time.Now()
+// Gives info whether are holidays today
+func (calendar *Calendar) IsHolidaysToday() (todayHolidays []Holiday, found bool) {
+	now := time.Now()
+	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 	// compare dates with time.Equal()
 	for _, holiday := range calendar.Holidays {
 		if today.Equal(holiday.Date) {
-			return &holiday, nil
+			todayHolidays = append(todayHolidays, holiday)
+			found = true
+		} else {
+			return
 		}
 	}
-	return nil, nil
+	return
+}
+
+// Method returns info about the next closest holiday. Detects long weekends, if holidays are adjacent to it.
+func (calendar *Calendar) GetNearestHolidays() (holidays []Holiday, found bool) {
+	var nearestHoliday Holiday
+	for index, holiday := range calendar.Holidays {
+		if index == 0 {
+			found = true
+			nearestHoliday = holiday
+			holidays = append(holidays, holiday)
+			continue
+		}
+
+		if nearestHoliday.Date.Equal(holiday.Date) {
+			holidays = append(holidays, holiday)
+		} else {
+			return
+		}
+	}
+	return
 }
 
 // Method returns info about the next closest holiday. Detects long weekends, if holiday is adjacent to it.
-func (calendar *Calendar) GetNearHolidaysInfo() (nearHolidaysInfo string, error error) {
+func (calendar *Calendar) GetNearHolidaysInfo() (nearHolidaysInfo string) {
 	holiday := calendar.Holidays[0] // the nearest holiday since today
 	nearHolidaysInfo = fmt.Sprintf(nextHolidayString, holiday.Name, holiday.Date.Month(), holiday.Date.Day())
 	weekday := holiday.Date.Weekday()
@@ -72,7 +103,7 @@ func (calendar *Calendar) GetNearHolidaysInfo() (nearHolidaysInfo string, error 
 		weekendsRangeInfo += getWeekendsRangeInfo(holiday.Date.Add(-24 * 2 * time.Hour))
 	}
 	nearHolidaysInfo += weekendsRangeInfo
-	return nearHolidaysInfo, nil
+	return nearHolidaysInfo
 }
 
 // Function calculates range of long weekends, when holiday is adjacent to it.

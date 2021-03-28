@@ -12,25 +12,28 @@ import (
 //For example, "The next holiday is International Workers' Day, May 1, and the weekend will last 3 days: May 1 - May 3".
 func main() {
 	calendar := &ph.Calendar{}
+
 	err := calendar.InitHolidaysCalendar()
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	if len(calendar.Holidays) == 0 {
 		fmt.Println("No more holidays this year !")
 		return
 	}
-	holiday, err := calendar.IsHolidayToday()
-	if err != nil {
-		log.Fatal(err)
-	}
-	if holiday != nil {
-		fmt.Printf("Holiday: %s is today !", holiday.Name)
+
+	holidays, found := calendar.IsHolidaysToday()
+	if found {
+		var names string
+		for _, holiday := range holidays {
+			names = names + holiday.Name + ", "
+		}
+		fmt.Printf("Holiday: %s is today !", names)
 		return
 	}
-	if info, err := calendar.GetNearHolidaysInfo(); err != nil {
-		log.Fatal(err)
-	} else {
-		fmt.Println(info)
-	}
+
+	holidaysInfo := calendar.GetNearHolidaysInfo()
+
+	fmt.Println(holidaysInfo)
 }
